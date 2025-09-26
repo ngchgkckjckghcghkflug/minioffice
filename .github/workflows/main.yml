@@ -89,6 +89,7 @@ jobs:
           librevenge-dev libetonyek-dev libfreehand-dev \
           libpagemaker-dev libvisio-dev libwpd-dev libwpg-dev \
           libwps-dev libstaroffice-dev \
+          libnss3-dev libnspr4-dev \
           || echo "Some optional dependencies not available, will configure accordingly"
 
     - name: Setup ccache
@@ -138,6 +139,7 @@ jobs:
             --disable-werror \
             --disable-odk \
             --disable-opencl \
+            --disable-xmlsec \
             --without-galleries \
             --without-templates \
             --without-myspell-dicts \
