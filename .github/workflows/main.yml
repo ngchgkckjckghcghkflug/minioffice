@@ -112,40 +112,17 @@ jobs:
       run: |
         cd libreoffice
         
-        # First, let's see what options are actually available
-        echo "Available configure options:"
-        ./autogen.sh --help | head -100
+        # Check what configure options are actually available
+        echo "=== Available configure options ==="
+        ./autogen.sh --help | grep -E "^\s*--disable|^\s*--enable|^\s*--with|^\s*--without" | head -50
         
+        echo "=== Starting minimal configuration ==="
         cat > minimal-configure.sh << 'EOF'
         #!/bin/bash
-        # Ultra-minimal configuration to avoid dependency issues
+        # Start with absolute minimal configuration and add only what we know works
         ./autogen.sh \
             --disable-gui \
             --without-java \
-            --disable-scripting \
-            --disable-python \
-            --disable-avahi \
-            --disable-online-update \
-            --disable-extension-integration \
-            --disable-extension-update \
-            --disable-coinmp \
-            --disable-lpsolve \
-            --disable-postgresql-sdbc \
-            --disable-firebird-sdbc \
-            --disable-ldap \
-            --disable-breakpad \
-            --disable-crashdump \
-            --disable-dbgutil \
-            --disable-werror \
-            --disable-odk \
-            --disable-opencl \
-            --disable-xmlsec \
-            --without-galleries \
-            --without-templates \
-            --without-myspell-dicts \
-            --with-lang="" \
-            --with-locales=en \
-            --without-system-libs \
             --enable-release-build
         EOF
         chmod +x minimal-configure.sh
