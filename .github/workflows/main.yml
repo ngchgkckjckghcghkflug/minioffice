@@ -1,0 +1,240 @@
+name: Build Minimal LibreOffice
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Free up disk space
+      run: |
+        # Remove unnecessary packages to free up space
+        sudo apt-get remove -y \
+          azure-cli \
+          google-cloud-sdk \
+          microsoft-edge-stable \
+          firefox \
+          powershell \
+          mono-devel
+        sudo apt-get autoremove -y
+        sudo apt-get clean
+        
+        # Remove large directories
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        
+        df -h  # Show available space
+        
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          git build-essential zip ccache junit4 libkrb5-dev nasm \
+          graphviz python3 python3-dev qtbase5-dev libqt5x11extras5-dev \
+          libxt-dev autoconf libcups2-dev libfontconfig1-dev gperf \
+          default-jdk doxygen libxslt1-dev xsltproc libxml2-utils \
+          libxrandr-dev libx11-dev bison flex libgtk-3-dev \
+          libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev ant \
+          libssl-dev libexpat1-dev libxml2-dev libxslt1-dev \
+          zlib1g-dev libpng-dev libjpeg-dev libfreetype6-dev \
+          libfontconfig1-dev libcairo2-dev libpango1.0-dev \
+          libglib2.0-dev libgtk-3-dev libgdk-pixbuf2.0-dev \
+          libatk1.0-dev libcairo-gobject2 libgtk-3-dev libgdk-pixbuf2.0-dev
+
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: libreoffice-build
+        max-size: 2G
+        
+    - name: Clone LibreOffice
+      run: |
+        git clone --depth 1 https://git.libreoffice.org/core libreoffice
+        cd libreoffice
+        # Get essential submodules only
+        git submodule update --init --depth 1 \
+          dictionaries \
+          helpcontent2 \
+          translations
+        
+    - name: Configure minimal build
+      run: |
+        cd libreoffice
+        cat > minimal-configure.sh << 'EOF'
+        #!/bin/bash
+        ./autogen.sh \
+            --disable-gui \
+            --enable-headless \
+            --disable-cups \
+            --disable-gtk3 \
+            --disable-gtk4 \
+            --disable-qt5 \
+            --disable-kf5 \
+            --disable-plasma \
+            --without-java \
+            --disable-scripting \
+            --disable-python \
+            --disable-avahi \
+            --disable-sdremote \
+            --disable-sdremote-bluetooth \
+            --disable-online-update \
+            --disable-extension-integration \
+            --disable-extension-update \
+            --disable-lotuswordpro \
+            --disable-mwaw \
+            --disable-coinmp \
+            --disable-lpsolve \
+            --disable-postgresql-sdbc \
+            --disable-firebird-sdbc \
+            --disable-ldap \
+            --disable-fetch-external \
+            --disable-orcus \
+            --disable-breakpad \
+            --disable-crashdump \
+            --disable-dbgutil \
+            --disable-split-debug \
+            --disable-werror \
+            --disable-dependency-tracking \
+            --disable-odk \
+            --disable-gio \
+            --disable-cmis \
+            --disable-curl \
+            --disable-cve-tests \
+            --disable-build-opensymbol \
+            --without-galleries \
+            --without-templates \
+            --without-myspell-dicts \
+            --with-lang="" \
+            --with-locales=en \
+            --disable-calc \
+            --disable-draw \
+            --disable-impress \
+            --disable-math \
+            --disable-base \
+            --disable-report-builder \
+            --disable-chart-tests \
+            --disable-database-connectivity \
+            --disable-opencl \
+            --disable-pdfimport \
+            --disable-poppler \
+            --disable-coinmp \
+            --disable-lpsolve \
+            --with-system-libs \
+            --with-system-headers
+        EOF
+        chmod +x minimal-configure.sh
+        ./minimal-configure.sh
+        
+    - name: Build LibreOffice
+      run: |
+        cd libreoffice
+        # Use all available cores but limit to prevent OOM
+        CORES=$(nproc)
+        if [ $CORES -gt 4 ]; then
+          CORES=4
+        fi
+        make -j$CORES
+        
+    - name: Package minimal installation
+      run: |
+        cd libreoffice
+        
+        # Create minimal package
+        mkdir -p minimal-libreoffice
+        
+        # Copy essential binaries and libraries
+        cp -r instdir/program minimal-libreoffice/
+        
+        # Copy minimal configuration
+        mkdir -p minimal-libreoffice/share
+        cp -r instdir/share/config minimal-libreoffice/share/
+        
+        # Copy essential resources
+        mkdir -p minimal-libreoffice/share/registry
+        cp -r instdir/share/registry minimal-libreoffice/share/
+        
+        # Strip binaries to reduce size
+        find minimal-libreoffice -name "*.so*" -exec strip --strip-unneeded {} \; 2>/dev/null || true
+        find minimal-libreoffice -name "soffice*" -exec strip --strip-unneeded {} \; 2>/dev/null || true
+        
+        # Create conversion script
+        cat > minimal-libreoffice/convert.sh << 'EOF'
+        #!/bin/bash
+        SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        export LD_LIBRARY_PATH="$SCRIPT_DIR/program:$LD_LIBRARY_PATH"
+        
+        if [ $# -lt 2 ]; then
+          echo "Usage: $0 <input.docx> <output_directory>"
+          exit 1
+        fi
+        
+        "$SCRIPT_DIR/program/soffice" --headless --convert-to pdf --outdir "$2" "$1"
+        EOF
+        chmod +x minimal-libreoffice/convert.sh
+        
+        # Create archive
+        tar -czf minimal-libreoffice.tar.gz minimal-libreoffice/
+        
+        # Show size
+        ls -lh minimal-libreoffice.tar.gz
+        du -sh minimal-libreoffice/
+        
+    - name: Test conversion
+      run: |
+        cd libreoffice
+        
+        # Create test DOCX (simple test document)
+        cat > test.html << 'EOF'
+        <!DOCTYPE html>
+        <html><body><h1>Test Document</h1><p>This is a test conversion.</p></body></html>
+        EOF
+        
+        # Convert HTML to DOCX first (as a test input)
+        echo "Testing LibreOffice conversion..."
+        ./minimal-libreoffice/program/soffice --headless --convert-to docx test.html
+        
+        # Test our conversion script
+        mkdir -p test-output
+        ./minimal-libreoffice/convert.sh test.docx test-output/
+        
+        # Verify PDF was created
+        if [ -f "test-output/test.pdf" ]; then
+          echo "✅ Conversion successful!"
+          ls -la test-output/test.pdf
+        else
+          echo "❌ Conversion failed!"
+          exit 1
+        fi
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: minimal-libreoffice
+        path: libreoffice/minimal-libreoffice.tar.gz
+        retention-days: 30
+        
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: libreoffice/minimal-libreoffice.tar.gz
+        body: |
+          Minimal LibreOffice build for DOCX to PDF conversion.
+          
+          Usage:
+          ```bash
+          tar -xzf minimal-libreoffice.tar.gz
+          ./minimal-libreoffice/convert.sh input.docx output_directory/
+          ```
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
