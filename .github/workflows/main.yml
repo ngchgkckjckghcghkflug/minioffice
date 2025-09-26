@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04  # Use newer Ubuntu with GCC 13
     
     steps:
     - name: Checkout repository
@@ -38,6 +38,19 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
+        
+        # Install newer GCC if needed (for Ubuntu 22.04)
+        if [ "$(lsb_release -rs)" = "22.04" ]; then
+          echo "Installing GCC 12 for Ubuntu 22.04..."
+          sudo apt-get install -y gcc-12 g++-12
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
+          sudo update-alternatives --set gcc /usr/bin/gcc-12
+          sudo update-alternatives --set g++ /usr/bin/g++-12
+        fi
+        
+        # Verify GCC version
+        gcc --version
         
         # Method 1: Try with build-dep (more reliable)
         if sudo sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list && sudo apt-get update; then
