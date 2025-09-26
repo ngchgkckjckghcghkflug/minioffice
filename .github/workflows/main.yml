@@ -92,17 +92,20 @@ jobs:
     - name: Configure minimal build
       run: |
         cd libreoffice
+        
+        # First, let's see what options are actually available
+        echo "Available configure options:"
+        ./autogen.sh --help | head -100
+        
         cat > minimal-configure.sh << 'EOF'
         #!/bin/bash
         ./autogen.sh \
             --disable-gui \
-            --enable-headless \
             --disable-cups \
             --disable-gtk3 \
             --disable-gtk4 \
             --disable-qt5 \
             --disable-kf5 \
-            --disable-plasma \
             --without-java \
             --disable-scripting \
             --disable-python \
@@ -113,14 +116,12 @@ jobs:
             --disable-extension-integration \
             --disable-extension-update \
             --disable-lotuswordpro \
-            --disable-mwaw \
             --disable-coinmp \
             --disable-lpsolve \
             --disable-postgresql-sdbc \
             --disable-firebird-sdbc \
             --disable-ldap \
             --disable-fetch-external \
-            --disable-orcus \
             --disable-breakpad \
             --disable-crashdump \
             --disable-dbgutil \
@@ -129,7 +130,6 @@ jobs:
             --disable-dependency-tracking \
             --disable-odk \
             --disable-gio \
-            --disable-cmis \
             --disable-curl \
             --disable-cve-tests \
             --disable-build-opensymbol \
@@ -138,21 +138,14 @@ jobs:
             --without-myspell-dicts \
             --with-lang="" \
             --with-locales=en \
-            --disable-calc \
-            --disable-draw \
-            --disable-impress \
-            --disable-math \
-            --disable-base \
             --disable-report-builder \
-            --disable-chart-tests \
             --disable-database-connectivity \
             --disable-opencl \
             --disable-pdfimport \
             --disable-poppler \
-            --disable-coinmp \
-            --disable-lpsolve \
             --with-system-libs \
-            --with-system-headers
+            --with-system-headers \
+            --enable-release-build
         EOF
         chmod +x minimal-configure.sh
         ./minimal-configure.sh
