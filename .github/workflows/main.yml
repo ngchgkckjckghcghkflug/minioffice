@@ -38,18 +38,20 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
+        
+        # Fix any broken packages first
+        sudo apt-get install -f
+        
+        # Install LibreOffice build dependencies using apt build-dep
+        # This automatically resolves all dependencies
+        sudo apt-get install -y software-properties-common
+        sudo apt-get build-dep -y libreoffice
+        
+        # Add our specific requirements
         sudo apt-get install -y \
-          git build-essential zip ccache junit4 libkrb5-dev nasm \
-          graphviz python3 python3-dev qtbase5-dev libqt5x11extras5-dev \
-          libxt-dev autoconf libcups2-dev libfontconfig1-dev gperf \
-          default-jdk doxygen libxslt1-dev xsltproc libxml2-utils \
-          libxrandr-dev libx11-dev bison flex libgtk-3-dev \
-          libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev ant \
-          libssl-dev libexpat1-dev libxml2-dev libxslt1-dev \
-          zlib1g-dev libpng-dev libjpeg-dev libfreetype6-dev \
-          libfontconfig1-dev libcairo2-dev libpango1.0-dev \
-          libglib2.0-dev libgtk-3-dev libgdk-pixbuf2.0-dev \
-          libatk1.0-dev libcairo-gobject2 libgtk-3-dev libgdk-pixbuf2.0-dev
+          git build-essential zip ccache nasm graphviz \
+          python3 python3-dev autoconf gperf ant \
+          libunwind-dev pkg-config bison flex
 
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
