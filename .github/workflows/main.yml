@@ -82,9 +82,14 @@ jobs:
           \
           qtbase5-dev libqt5x11extras5-dev || true
           
-        # Install GStreamer last (most likely to cause issues)
+        # Install missing dependencies that are causing configure errors
         sudo apt-get install -y \
-          libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev || echo "GStreamer install failed, continuing..."
+          libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+          libcmis-dev liborcus-dev libmwaw-dev \
+          librevenge-dev libetonyek-dev libfreehand-dev \
+          libpagemaker-dev libvisio-dev libwpd-dev libwpg-dev \
+          libwps-dev libstaroffice-dev \
+          || echo "Some optional dependencies not available, will configure accordingly"
 
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
@@ -112,52 +117,33 @@ jobs:
         
         cat > minimal-configure.sh << 'EOF'
         #!/bin/bash
+        # Ultra-minimal configuration to avoid dependency issues
         ./autogen.sh \
             --disable-gui \
-            --disable-cups \
-            --disable-gtk3 \
-            --disable-gtk4 \
-            --disable-qt5 \
-            --disable-kf5 \
             --without-java \
             --disable-scripting \
             --disable-python \
             --disable-avahi \
-            --disable-sdremote \
-            --disable-sdremote-bluetooth \
             --disable-online-update \
             --disable-extension-integration \
             --disable-extension-update \
-            --disable-lotuswordpro \
             --disable-coinmp \
             --disable-lpsolve \
             --disable-postgresql-sdbc \
             --disable-firebird-sdbc \
             --disable-ldap \
-            --disable-fetch-external \
             --disable-breakpad \
             --disable-crashdump \
             --disable-dbgutil \
-            --disable-split-debug \
             --disable-werror \
-            --disable-dependency-tracking \
             --disable-odk \
-            --disable-gio \
-            --disable-curl \
-            --disable-cve-tests \
-            --disable-build-opensymbol \
+            --disable-opencl \
             --without-galleries \
             --without-templates \
             --without-myspell-dicts \
             --with-lang="" \
             --with-locales=en \
-            --disable-report-builder \
-            --disable-database-connectivity \
-            --disable-opencl \
-            --disable-pdfimport \
-            --disable-poppler \
-            --with-system-libs \
-            --with-system-headers \
+            --without-system-libs \
             --enable-release-build
         EOF
         chmod +x minimal-configure.sh
