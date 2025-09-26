@@ -39,19 +39,39 @@ jobs:
       run: |
         sudo apt-get update
         
-        # Fix any broken packages first
-        sudo apt-get install -f
+        # Method 1: Try with build-dep (more reliable)
+        if sudo sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list && sudo apt-get update; then
+          echo "Using build-dep method..."
+          sudo apt-get build-dep -y libreoffice || true
+        fi
         
-        # Install LibreOffice build dependencies using apt build-dep
-        # This automatically resolves all dependencies
-        sudo apt-get install -y software-properties-common
-        sudo apt-get build-dep -y libreoffice
-        
-        # Add our specific requirements
+        # Method 2: Manual dependency installation (fallback)
+        echo "Installing manual dependencies..."
         sudo apt-get install -y \
-          git build-essential zip ccache nasm graphviz \
-          python3 python3-dev autoconf gperf ant \
-          libunwind-dev pkg-config bison flex
+          build-essential git zip ccache ant autoconf \
+          pkg-config nasm graphviz python3 python3-dev \
+          gperf bison flex libunwind-dev \
+          \
+          default-jdk junit4 \
+          \
+          libkrb5-dev libssl-dev libexpat1-dev \
+          libxml2-dev libxslt1-dev libxml2-utils \
+          zlib1g-dev libpng-dev libjpeg-dev \
+          \
+          libfontconfig1-dev libfreetype6-dev \
+          libcairo2-dev libpango1.0-dev libglib2.0-dev \
+          libgdk-pixbuf2.0-dev libatk1.0-dev \
+          \
+          libx11-dev libxrandr-dev libxt-dev \
+          libgtk-3-dev libcairo-gobject2 \
+          \
+          libcups2-dev doxygen xsltproc \
+          \
+          qtbase5-dev libqt5x11extras5-dev || true
+          
+        # Install GStreamer last (most likely to cause issues)
+        sudo apt-get install -y \
+          libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev || echo "GStreamer install failed, continuing..."
 
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
