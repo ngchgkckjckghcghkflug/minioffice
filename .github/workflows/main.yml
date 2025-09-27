@@ -116,7 +116,7 @@ jobs:
         echo "=== Available configure options ==="
         ./autogen.sh --help | grep -E "^\s*--disable|^\s*--enable|^\s*--with|^\s*--without" | head -50
         
-        echo "=== Starting minimal configuration ==="
+        echo "=== Starting optimized configuration ==="
         cat > minimal-configure.sh << 'EOF'
         #!/bin/bash
         # Heavily optimized minimal configuration for DOCX to PDF only
@@ -168,18 +168,38 @@ jobs:
             --without-fonts \
             --without-afms \
             --without-ppds \
-            --without-theme="galaxy" \
-            --without-theme="hicontrast" \
-            --without-theme="oxygen" \
-            --without-theme="classic" \
             --with-lang="" \
             --with-locales=en \
             --enable-optimized \
             --disable-rpath \
             --disable-epm
         EOF
+        
         chmod +x minimal-configure.sh
-        ./minimal-configure.sh
+        
+        # Try the optimized configuration first
+        if ! ./minimal-configure.sh; then
+          echo "=== Optimized configuration failed, trying basic version ==="
+          cat > basic-configure.sh << 'EOF'
+        #!/bin/bash
+        # Basic minimal configuration that should always work
+        ./autogen.sh \
+            --disable-gui \
+            --without-java \
+            --enable-release-build \
+            --disable-scripting \
+            --disable-python \
+            --disable-werror \
+            --without-galleries \
+            --without-templates \
+            --without-myspell-dicts \
+            --with-lang="" \
+            --with-locales=en \
+            --enable-optimized
+        EOF
+          chmod +x basic-configure.sh
+          ./basic-configure.sh
+        fi
         
     - name: Build LibreOffice
       run: |
