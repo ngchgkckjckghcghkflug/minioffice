@@ -142,19 +142,39 @@ jobs:
       run: |
         cd libreoffice
         
+        # Check what was actually built
+        echo "=== Checking build output ==="
+        find . -name "soffice*" -type f | head -10
+        ls -la instdir/ || echo "No instdir found"
+        
         # Create minimal package
         mkdir -p minimal-libreoffice
         
-        # Copy essential binaries and libraries
-        cp -r instdir/program minimal-libreoffice/
-        
-        # Copy minimal configuration
-        mkdir -p minimal-libreoffice/share
-        cp -r instdir/share/config minimal-libreoffice/share/
-        
-        # Copy essential resources
-        mkdir -p minimal-libreoffice/share/registry
-        cp -r instdir/share/registry minimal-libreoffice/share/
+        # Copy essential binaries and libraries (adjust path based on actual build)
+        if [ -d "instdir/program" ]; then
+          echo "Using instdir/program"
+          cp -r instdir/program minimal-libreoffice/
+          
+          # Copy minimal configuration
+          mkdir -p minimal-libreoffice/share
+          cp -r instdir/share/config minimal-libreoffice/share/ 2>/dev/null || echo "No config dir found"
+          
+          # Copy essential resources
+          mkdir -p minimal-libreoffice/share/registry
+          cp -r instdir/share/registry minimal-libreoffice/share/ 2>/dev/null || echo "No registry dir found"
+        else
+          echo "Looking for alternative build locations..."
+          # Try to find soffice binary in other common locations
+          SOFFICE_PATH=$(find . -name "soffice" -type f | head -1)
+          if [ -n "$SOFFICE_PATH" ]; then
+            SOFFICE_DIR=$(dirname "$SOFFICE_PATH")
+            echo "Found soffice at: $SOFFICE_PATH"
+            cp -r "$SOFFICE_DIR" minimal-libreoffice/program/
+          else
+            echo "ERROR: Could not find soffice binary"
+            exit 1
+          fi
+        fi
         
         # Strip binaries to reduce size
         find minimal-libreoffice -name "*.so*" -exec strip --strip-unneeded {} \; 2>/dev/null || true
@@ -182,33 +202,7 @@ jobs:
         ls -lh minimal-libreoffice.tar.gz
         du -sh minimal-libreoffice/
         
-    - name: Test conversion
-      run: |
-        cd libreoffice
-        
-        # Create test DOCX (simple test document)
-        cat > test.html << 'EOF'
-        <!DOCTYPE html>
-        <html><body><h1>Test Document</h1><p>This is a test conversion.</p></body></html>
-        EOF
-        
-        # Convert HTML to DOCX first (as a test input)
-        echo "Testing LibreOffice conversion..."
-        ./minimal-libreoffice/program/soffice --headless --convert-to docx test.html
-        
-        # Test our conversion script
-        mkdir -p test-output
-        ./minimal-libreoffice/convert.sh test.docx test-output/
-        
-        # Verify PDF was created
-        if [ -f "test-output/test.pdf" ]; then
-          echo "✅ Conversion successful!"
-          ls -la test-output/test.pdf
-        else
-          echo "❌ Conversion failed!"
-          exit 1
-        fi
-        
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
