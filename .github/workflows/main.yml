@@ -108,7 +108,7 @@ jobs:
           helpcontent2 \
           translations
         
-    - name: Configure minimal build
+    - name: Configure LibreOffice build
       run: |
         cd libreoffice
         
@@ -116,90 +116,16 @@ jobs:
         echo "=== Available configure options ==="
         ./autogen.sh --help | grep -E "^\s*--disable|^\s*--enable|^\s*--with|^\s*--without" | head -50
         
-        echo "=== Starting optimized configuration ==="
-        cat > minimal-configure.sh << 'EOF'
+        echo "=== Starting regular configuration ==="
+        cat > configure-build.sh << 'EOF'
         #!/bin/bash
-        # Heavily optimized minimal configuration for DOCX to PDF only
+        # Regular LibreOffice build with minimal changes
         ./autogen.sh \
-            --disable-gui \
-            --without-java \
-            --enable-release-build \
-            --disable-scripting \
-            --disable-python \
-            --disable-avahi \
-            --disable-online-update \
-            --disable-extension-integration \
-            --disable-extension-update \
-            --disable-coinmp \
-            --disable-lpsolve \
-            --disable-postgresql-sdbc \
-            --disable-firebird-sdbc \
-            --disable-ldap \
-            --disable-breakpad \
-            --disable-crashdump \
-            --disable-dbgutil \
-            --disable-werror \
-            --disable-odk \
-            --disable-opencl \
-            --disable-cups \
-            --disable-gtk3 \
-            --disable-gtk4 \
-            --disable-qt5 \
-            --disable-kf5 \
-            --disable-sdremote \
-            --disable-sdremote-bluetooth \
-            --disable-report-builder \
-            --disable-database-connectivity \
-            --disable-pdfimport \
-            --disable-poppler \
-            --disable-lotuswordpro \
-            --disable-fetch-external \
-            --disable-dependency-tracking \
-            --disable-gio \
-            --disable-curl \
-            --disable-cve-tests \
-            --disable-build-opensymbol \
-            --disable-split-debug \
-            --disable-symbols \
-            --disable-debug \
-            --without-galleries \
-            --without-templates \
-            --without-myspell-dicts \
-            --without-fonts \
-            --without-afms \
-            --without-ppds \
-            --with-lang="" \
-            --with-locales=en \
-            --enable-optimized \
-            --disable-rpath \
-            --disable-epm
+            --enable-release-build
         EOF
         
-        chmod +x minimal-configure.sh
-        
-        # Try the optimized configuration first
-        if ! ./minimal-configure.sh; then
-          echo "=== Optimized configuration failed, trying basic version ==="
-          cat > basic-configure.sh << 'EOF'
-        #!/bin/bash
-        # Basic minimal configuration that should always work
-        ./autogen.sh \
-            --disable-gui \
-            --without-java \
-            --enable-release-build \
-            --disable-scripting \
-            --disable-python \
-            --disable-werror \
-            --without-galleries \
-            --without-templates \
-            --without-myspell-dicts \
-            --with-lang="" \
-            --with-locales=en \
-            --enable-optimized
-        EOF
-          chmod +x basic-configure.sh
-          ./basic-configure.sh
-        fi
+        chmod +x configure-build.sh
+        ./configure-build.sh
         
     - name: Build LibreOffice
       run: |
@@ -211,7 +137,7 @@ jobs:
         fi
         make -j$CORES
         
-    - name: Package minimal installation
+    - name: Package LibreOffice installation
       run: |
         cd libreoffice
         
@@ -220,79 +146,27 @@ jobs:
         find . -name "soffice*" -type f | head -10
         ls -la instdir/ || echo "No instdir found"
         
-        # Create minimal package
-        mkdir -p minimal-libreoffice
+        # Create complete package
+        mkdir -p libreoffice-build
         
-        # Copy essential binaries and libraries (adjust path based on actual build)
-        if [ -d "instdir/program" ]; then
-          echo "Using instdir/program"
-          
-          # Copy only essential binaries
-          mkdir -p minimal-libreoffice/program
-          cp instdir/program/soffice* minimal-libreoffice/program/ || true
-          
-          # Copy only essential shared libraries (not all)
-          cp instdir/program/*.so minimal-libreoffice/program/ 2>/dev/null || true
-          cp instdir/program/libuno_*.so* minimal-libreoffice/program/ 2>/dev/null || true
-          cp instdir/program/libmerged.so minimal-libreoffice/program/ 2>/dev/null || true
-          
-          # Copy minimal configuration (only what's needed for headless operation)
-          mkdir -p minimal-libreoffice/share
-          if [ -d "instdir/share/config" ]; then
-            mkdir -p minimal-libreoffice/share/config
-            # Only copy essential config files
-            cp -r instdir/share/config/soffice.cfg minimal-libreoffice/share/config/ 2>/dev/null || true
-          fi
-          
-          # Copy only essential registry files
-          if [ -d "instdir/share/registry" ]; then
-            mkdir -p minimal-libreoffice/share/registry
-            # Only copy files needed for Writer/conversion
-            cp instdir/share/registry/writer.xcd minimal-libreoffice/share/registry/ 2>/dev/null || true
-            cp instdir/share/registry/main.xcd minimal-libreoffice/share/registry/ 2>/dev/null || true
-            cp instdir/share/registry/*.xcd minimal-libreoffice/share/registry/ 2>/dev/null || true
-          fi
-          
-          # Remove unnecessary files
-          find minimal-libreoffice -name "*.debug" -delete 2>/dev/null || true
-          find minimal-libreoffice -name "*.a" -delete 2>/dev/null || true
-          
+        # Copy the full installation
+        if [ -d "instdir" ]; then
+          echo "Copying full LibreOffice installation..."
+          cp -r instdir/* libreoffice-build/
         else
-          echo "Looking for alternative build locations..."
-          SOFFICE_PATH=$(find . -name "soffice" -type f | head -1)
-          if [ -n "$SOFFICE_PATH" ]; then
-            SOFFICE_DIR=$(dirname "$SOFFICE_PATH")
-            echo "Found soffice at: $SOFFICE_PATH"
-            mkdir -p minimal-libreoffice/program
-            cp "$SOFFICE_PATH" minimal-libreoffice/program/
-            cp "$SOFFICE_DIR"/*.so minimal-libreoffice/program/ 2>/dev/null || true
-          else
-            echo "ERROR: Could not find soffice binary"
-            exit 1
-          fi
+          echo "ERROR: Could not find instdir"
+          exit 1
         fi
         
-        # Aggressively strip all binaries and libraries
-        echo "=== Stripping binaries ==="
-        find minimal-libreoffice -type f -executable -exec strip --strip-all {} \; 2>/dev/null || true
-        find minimal-libreoffice -name "*.so*" -exec strip --strip-unneeded {} \; 2>/dev/null || true
-        
-        # Remove any debugging symbols
-        find minimal-libreoffice -name "*.debug" -delete 2>/dev/null || true
-        
-        # Create optimized conversion script
-        cat > minimal-libreoffice/convert.sh << 'EOF'
+        # Create conversion script for convenience
+        cat > libreoffice-build/convert.sh << 'EOF'
         #!/bin/bash
         SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
         export LD_LIBRARY_PATH="$SCRIPT_DIR/program:$LD_LIBRARY_PATH"
         
-        # Minimal environment for headless conversion
-        export SAL_USE_VCLPLUGIN=svp
-        export DISPLAY=""
-        
         if [ $# -lt 2 ]; then
-          echo "Usage: $0 <input.docx> <output_directory>"
-          echo "Converts DOCX files to PDF using minimal LibreOffice"
+          echo "Usage: $0 <input_file> <output_directory>"
+          echo "Converts documents using LibreOffice headless mode"
           exit 1
         fi
         
@@ -312,37 +186,23 @@ jobs:
           }
         fi
         
-        # Convert with minimal options
+        # Convert with headless mode
         "$SCRIPT_DIR/program/soffice" \
           --headless \
-          --invisible \
-          --nodefault \
-          --nolockcheck \
-          --nologo \
-          --norestore \
           --convert-to pdf \
           --outdir "$OUTPUT_DIR" \
           "$INPUT_FILE"
         EOF
-        chmod +x minimal-libreoffice/convert.sh
+        chmod +x libreoffice-build/convert.sh
         
-        # Create archive with maximum compression
-        echo "=== Creating compressed archive ==="
-        tar -czf minimal-libreoffice.tar.gz minimal-libreoffice/
-        
-        # Try to compress further with xz if available
-        if command -v xz >/dev/null 2>&1; then
-          echo "Creating XZ compressed version..."
-          tar -cJf minimal-libreoffice.tar.xz minimal-libreoffice/
-          ls -lh minimal-libreoffice.tar.xz
-        fi
+        # Create archive
+        echo "=== Creating archive ==="
+        tar -czf libreoffice-build.tar.gz libreoffice-build/
         
         # Show final sizes
-        echo "=== Final package sizes ==="
-        ls -lh minimal-libreoffice.tar.*
-        echo "=== Directory size breakdown ==="
-        du -sh minimal-libreoffice/
-        du -sh minimal-libreoffice/*/ 2>/dev/null || true
+        echo "=== Final package size ==="
+        ls -lh libreoffice-build.tar.gz
+        du -sh libreoffice-build/
         
 
     - name: Upload build artifacts
