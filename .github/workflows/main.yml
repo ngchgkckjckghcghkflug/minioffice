@@ -21,10 +21,6 @@ jobs:
         sudo apt-get remove -y \
           azure-cli \
           google-cloud-sdk \
-          microsoft-edge-stable \
-          firefox \
-          powershell \
-          mono-devel
         sudo apt-get autoremove -y
         sudo apt-get clean
         
