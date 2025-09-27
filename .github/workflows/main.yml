@@ -209,7 +209,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: minimal-libreoffice
-        path: libreoffice/minimal-libreoffice.tar.gz
+        path: libreoffice-build/libreoffice-build.tar.gz
         retention-days: 30
         
     - name: Create Release (on tag)
