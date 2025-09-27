@@ -209,14 +209,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: minimal-libreoffice
-        path: libreoffice-build/libreoffice-build.tar.gz
+        path: libreoffice/libreoffice-build.tar.gz
         retention-days: 30
         
     - name: Create Release (on tag)
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: libreoffice/minimal-libreoffice.tar.gz
+        files: libreoffice/libreoffice-build.tar.gz
         body: |
           Minimal LibreOffice build for DOCX to PDF conversion.
           
