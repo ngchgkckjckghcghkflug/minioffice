@@ -121,7 +121,7 @@ jobs:
         #!/bin/bash
         # Regular LibreOffice build with minimal changes
         ./autogen.sh \
-            --without-x --without-java 
+            --without-x --without-java --with-theme=no
         EOF
         
         chmod +x configure-build.sh
