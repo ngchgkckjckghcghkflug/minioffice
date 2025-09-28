@@ -121,10 +121,7 @@ jobs:
         # Regular LibreOffice build with minimal changes
         ./autogen.sh \
             --without-x --without-java --with-theme=no
-          --disable-cairo-canvas \
           --disable-coinmp \
-          --disable-cups \
-          --disable-cve-tests \
           --disable-dbus \
           --disable-dconf \
           --disable-dependency-tracking \
