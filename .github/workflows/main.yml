@@ -120,40 +120,7 @@ jobs:
         #!/bin/bash
         # Regular LibreOffice build with minimal changes
         ./autogen.sh \
-            --without-x --without-java --with-theme=no
-          --disable-dbus \
-          --disable-dconf \
-          --disable-dependency-tracking \
-          --disable-evolution2 \
-          --disable-dbgutil \
-          --disable-extension-integration \
-          --disable-extension-update \
-          --disable-firebird-sdbc \
-          --disable-gio \
-          --disable-gstreamer-0-10 \
-          --disable-gstreamer-1-0 \
-          --disable-gtk \
-          --disable-gtk3 \
-          --disable-introspection \
-          --disable-kde4 \
-          --disable-largefile \
-          --disable-lotuswordpro \
-          --disable-lpsolve \
-          --disable-odk \
-          --disable-ooenv \
-          --disable-pch \
-          --disable-postgresql-sdbc \
-          --disable-python \
-          --disable-randr \
-          --disable-report-builder \
-          --disable-scripting-beanshell \
-          --disable-scripting-javascript \
-          --disable-sdremote \
-          --disable-sdremote-bluetooth \
-          --with-galleries="no" \
-          --without-junit \
-          --without-krb5 \
-          --disable-option-checking
+            --without-x --without-java --with-theme=no --disable-extension-integration --disable-scripting --disable-coinmp --disable-lpsolve --enable-lto --disable-gtk3 --disable-cairo-canvas --disable-dbus --disable-sdremote --disable-sdremote-bluetooth --disable-randr --disable-gstreamer-1-0 --disable-cve-tests --disable-cups --disable-postgresql-sdbc --disable-dconf --disable-ldap --disable-opencl --disable-xmlhelp --disable-scripting-beanshell
         EOF
         
         chmod +x configure-build.sh
@@ -164,7 +131,7 @@ jobs:
         cd libreoffice
         # Use all available cores but limit to prevent OOM
         CORES=$(nproc)
-        if [ $CORES -gt 4 ]; then
+        if [ $CORES -gt 4 ]; then 
           CORES=4
         fi
         make -j$CORES
