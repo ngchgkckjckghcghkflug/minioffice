@@ -9,12 +9,32 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04-arm  # Use newer Ubuntu with GCC 13
+    runs-on: ubuntu-24.04  # Use newer Ubuntu with GCC 13
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       
+    - name: Free up disk space
+      run: |
+        # Remove unnecessary packages to free up space
+        sudo apt-get remove -y \
+          azure-cli \
+          google-cloud-sdk \
+          microsoft-edge-stable \
+          firefox \
+          powershell \
+          mono-devel
+        sudo apt-get autoremove -y
+        sudo apt-get clean
+        
+        # Remove large directories
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        
+        df -h  # Show available space
+        
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -71,7 +91,6 @@ jobs:
           libwps-dev libstaroffice-dev \
           libnss3-dev libnspr4-dev \
           || echo "Some optional dependencies not available, will configure accordingly"
-
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
@@ -102,6 +121,43 @@ jobs:
         # Regular LibreOffice build with minimal changes
         ./autogen.sh \
             --without-x --without-java --with-theme=no
+            --disable-avahi \
+          --disable-cairo-canvas \
+          --disable-coinmp \
+          --disable-cups \
+          --disable-cve-tests \
+          --disable-dbus \
+          --disable-dconf \
+          --disable-dependency-tracking \
+          --disable-evolution2 \
+          --disable-dbgutil \
+          --disable-extension-integration \
+          --disable-extension-update \
+          --disable-firebird-sdbc \
+          --disable-gio \
+          --disable-gstreamer-0-10 \
+          --disable-gstreamer-1-0 \
+          --disable-gtk \
+          --disable-gtk3 \
+          --disable-introspection \
+          --disable-kde4 \
+          --disable-largefile \
+          --disable-lotuswordpro \
+          --disable-lpsolve \
+          --disable-odk \
+          --disable-ooenv \
+          --disable-pch \
+          --disable-postgresql-sdbc \
+          --disable-python \
+          --disable-randr \
+          --disable-report-builder \
+          --disable-scripting-beanshell \
+          --disable-scripting-javascript \
+          --disable-sdremote \
+          --disable-sdremote-bluetooth \
+          --with-galleries="no" \
+          --without-junit \
+          --without-krb5 \
         EOF
         
         chmod +x configure-build.sh
@@ -184,7 +240,6 @@ jobs:
         ls -lh libreoffice-build.tar.gz
         du -sh libreoffice-build/
         
-
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
