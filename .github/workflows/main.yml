@@ -17,22 +17,6 @@ jobs:
       
     - name: Free up disk space
       run: |
-        # Remove unnecessary packages to free up space
-        sudo apt-get remove -y \
-          azure-cli \
-          google-cloud-sdk \
-          microsoft-edge-stable \
-          firefox \
-          powershell \
-          mono-devel
-        sudo apt-get autoremove -y
-        sudo apt-get clean
-        
-        # Remove large directories
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /usr/local/share/boost
-        
         df -h  # Show available space
         
     - name: Install dependencies
