@@ -93,18 +93,22 @@ jobs:
         
     - name: Configure LibreOffice build
       run: |
-        cd libreoffice
         
-        # Check what configure options are actually available
-        echo "=== Available configure options ==="
-        ./autogen.sh --help | grep -E "^\s*--disable|^\s*--enable|^\s*--with|^\s*--without" | head -50
         
         echo "=== Starting regular configuration ==="
+        git clone https://github.com/emscripten-core/emsdk.git
+        cd emsdk
+        git pull
+        ./emsdk install 3.1.46
+        ./emsdk activate 3.1.46
+        source ./emsdk_env.sh
+        cd ..
         cat > configure-build.sh << 'EOF'
         #!/bin/bash
         # Regular LibreOffice build with minimal changes
+        cd libreoffice
         ./autogen.sh \
-            --without-x --without-java --with-theme=no --disable-extension-integration --disable-extension-update --disable-online-update --disable-scripting --disable-coinmp --disable-lpsolve --disable-gtk3 --disable-cairo-canvas --disable-dbus --disable-sdremote --disable-sdremote-bluetooth --disable-randr --disable-gstreamer-1-0 --disable-cve-tests --disable-cups --disable-postgresql-sdbc --disable-firebird-sdbc --disable-dconf --disable-ldap --disable-opencl --disable-xmlhelp --disable-scripting-beanshell --disable-gui --enable-optimized=yes --without-webdav --disable-curl --disable-odk --disable-lotuswordpro --without-galleries --disable-libcmis --disable-debug --with-parallelism  
+            --disable-debug --enable-sal-log --disable-crashdump --host=wasm32-local-emscripten --disable-gui --with-wasm-module=writer --with-package-format=emscripten
         EOF
         
         chmod +x configure-build.sh
