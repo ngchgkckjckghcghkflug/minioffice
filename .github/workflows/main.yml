@@ -108,7 +108,7 @@ jobs:
         # Regular LibreOffice build with minimal changes
         cd libreoffice
         ./autogen.sh \
-            --disable-debug --enable-sal-log --disable-lpsolve --disable-cve-tests --disable-curl --without-templates  --without-galleries --disable-gio --disable-curl --disable-build-opensymbol --disable-sdremote --disable-sdremote-bluetooth --disable-report-builder --disable-lotuswordpro --disable-gtk3 --disable-gtk4 --disable-qt5 --disable-kf5 --disable-cups --disable-ldap --disable-dbgutil --disable-opencl --disable-breakpad --without-java --disable-python --disable-coinmp --disable-avahi --disable-postgresql-sdbc --disable-firebird-sdbc --disable-crashdump --disable-extension-update --disable-extension-integration --host=wasm32-local-emscripten --disable-gui --disable-online-update --disable-scripting --disable-odk --with-wasm-module=writer --with-package-format=emscripten
+            --disable-debug --enable-sal-log --disable-lpsolve --without-webdav --disable-cve-tests --disable-curl --without-templates  --without-galleries --disable-gio --disable-curl --disable-build-opensymbol --disable-sdremote --disable-sdremote-bluetooth --disable-report-builder --disable-lotuswordpro --disable-gtk3 --disable-gtk4 --disable-qt5 --disable-kf5 --disable-cups --disable-ldap --disable-dbgutil --disable-opencl --disable-breakpad --without-java --disable-python --disable-coinmp --disable-avahi --disable-postgresql-sdbc --disable-firebird-sdbc --disable-crashdump --disable-extension-update --disable-extension-integration --host=wasm32-local-emscripten --disable-gui --disable-online-update --disable-scripting --disable-odk --with-wasm-module=writer --with-package-format=emscripten
         EOF
         
         chmod +x configure-build.sh
