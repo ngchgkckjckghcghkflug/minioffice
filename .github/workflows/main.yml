@@ -112,7 +112,7 @@ jobs:
         export LDFLAGS="-Wl,--gc-sections -s"
         
         ./autogen.sh \
-            --disable-debug --disable-symbols --enable-sal-log --disable-crashdump --host=wasm32-local-emscripten --disable-gui --with-wasm-module=writer --with-package-format=emscripten
+            --disable-ccache --disable-debug --disable-symbols --enable-sal-log --disable-crashdump --host=wasm32-local-emscripten --disable-gui --with-wasm-module=writer --with-package-format=emscripten
         EOF
         
         chmod +x configure-build.sh
