@@ -107,6 +107,7 @@ jobs:
         #!/bin/bash
         # Regular LibreOffice build with minimal changes
         cd libreoffice
+        source ./emsdk/emsdk_env.sh
         export CFLAGS="-Os"
         export CXXFLAGS="-Os"
         
