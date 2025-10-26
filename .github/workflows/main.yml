@@ -120,6 +120,7 @@ jobs:
     - name: Build LibreOffice
       run: |
         cd libreoffice
+        source ./emsdk/emsdk_env.sh
         emmake make
         
     - name: Package LibreOffice installation
