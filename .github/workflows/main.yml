@@ -96,7 +96,7 @@ jobs:
         
         
         echo "=== Starting regular configuration ==="
-        git clone https://github.com/emscripten-core/emsdk.git -- depth 1
+        git clone --depth 1 https://github.com/emscripten-core/emsdk.git 
         cd emsdk
         git pull
         ./emsdk install 3.1.74
