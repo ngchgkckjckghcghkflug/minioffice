@@ -110,7 +110,7 @@ jobs:
         export OPENSSL_CFLAGS="-O1"
         
         ./autogen.sh \
-             --enable-optimized=yes --disable-debug --enable-sal-log --enable-wasm-strip --disable-lpsolve --without-webdav --disable-cve-tests --disable-curl --without-templates  --without-galleries --disable-gio --disable-curl --disable-build-opensymbol --disable-sdremote --disable-sdremote-bluetooth --disable-report-builder --disable-lotuswordpro --disable-gtk3 --disable-gtk4 --disable-qt5 --disable-kf5 --disable-cups --disable-ldap --disable-dbgutil --disable-opencl --disable-breakpad --disable-xmlhelp --without-java --disable-python --disable-coinmp --disable-avahi --disable-postgresql-sdbc --disable-firebird-sdbc --disable-crashdump --disable-extension-update --disable-extension-integration --host=wasm32-local-emscripten --disable-gui --disable-online-update --disable-scripting --without-x --with-theme=no --disable-gstreamer-1-0 --without-myspell-dicts --disable-odk --with-wasm-module=writer --with-package-format=emscripten
+             --enable-optimized=yes --disable-debug --enable-sal-log --disable-crashdump --host=wasm32-local-emscripten --disable-gui --with-wasm-module=writer --with-package-format=emscripten
         EOF
         
         chmod +x configure-build.sh
