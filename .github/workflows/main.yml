@@ -43,10 +43,6 @@ jobs:
       run: |
         cd libreoffice
         
-        # Check what configure options are actually available
-        echo "=== Available configure options ==="
-        ./autogen.sh --help | grep -E "^\s*--disable|^\s*--enable|^\s*--with|^\s*--without" | head -50
-        
         echo "=== Starting regular configuration ==="
         cat > configure-build.sh << 'EOF'
         #!/bin/bash
