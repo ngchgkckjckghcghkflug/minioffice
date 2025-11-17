@@ -49,6 +49,7 @@ jobs:
         #LibreOffice build with changes
         export CFLAGS="-ffunction-sections -fdata-sections"
         export LDFLAGS="-Wl,--gc-sections -s"
+        export ax_cv_c_float_words_bigendian=no
         ./autogen.sh \
              --without-x --without-java --with-theme=no --enable-optimized=yes --enable-lto
         EOF
