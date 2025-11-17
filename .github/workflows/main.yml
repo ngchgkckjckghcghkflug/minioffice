@@ -50,8 +50,8 @@ jobs:
         export CFLAGS="-ffunction-sections -fdata-sections"
         export LDFLAGS="-Wl,--gc-sections -s"
         export ax_cv_c_float_words_bigendian=no
-        ./autogen.sh \
-             --without-x --without-java --with-theme=no --enable-optimized=yes --enable-lto
+        ./autogen.sh --best-effort \
+             --without-x --without-java --with-theme=no --enable-optimized=yes --enable-lto ax_cv_c_float_words_bigendian=no
         EOF
         chmod +x configure-build.sh
         ./configure-build.sh
