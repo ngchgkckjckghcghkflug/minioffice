@@ -49,8 +49,11 @@ jobs:
         #LibreOffice build with changes
         export CFLAGS="-ffunction-sections -fdata-sections"
         export LDFLAGS="-Wl,--gc-sections -s"
+
+        export CAIRO_CFLAGS=""
+        export CAIRO_LIBS=""
         ./autogen.sh \
-             --without-x --without-java --with-theme=no --enable-optimized=yes --enable-lto --disable-cairo-canvas
+             --without-x --without-java --with-theme=no --enable-optimized=yes --enable-lto 
         EOF
         chmod +x configure-build.sh
         ./configure-build.sh
