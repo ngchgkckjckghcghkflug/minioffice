@@ -53,7 +53,7 @@ jobs:
         export CAIRO_CFLAGS=""
         export CAIRO_LIBS=""
         ./autogen.sh \
-             --without-x --without-java --with-theme=no --enable-optimized=yes --enable-lto 
+             --without-x --without-java --with-theme=no --enable-optimized=yes 
         EOF
         chmod +x configure-build.sh
         ./configure-build.sh
