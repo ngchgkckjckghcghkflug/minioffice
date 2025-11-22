@@ -43,21 +43,11 @@ jobs:
         cd libreoffice
         
         echo "=== Starting regular configuration ==="
-        cat > configure-build.sh << 'EOF'
-        #!/bin/bash
-        #LibreOffice build with changes
-        export CFLAGS="-ffunction-sections -fdata-sections"
-        export LDFLAGS="-Wl,--gc-sections -s"
         
-        ./autogen.sh \
-             --disable-pdfium --without-x --without-java --with-theme=no --enable-optimized=yes --enable-lto 
-        EOF
-        chmod +x configure-build.sh
-        ./configure-build.sh
         
     - name: Build LibreOffice
       run: |
-        cd libreoffice
+        cd libreoffice/static
         make
         
     - name: Package LibreOffice installation
