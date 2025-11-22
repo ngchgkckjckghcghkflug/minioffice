@@ -35,7 +35,7 @@ jobs:
         
     - name: Clone LibreOffice
       run: |
-        git clone --depth 1  --revision=2b515d0 --single-branch https://github.com/LibreOffice/core.git libreoffice
+        git clone --depth 1  --revision=2b515d095d7251db98241e6b69f9b110e64e9aea --single-branch https://github.com/LibreOffice/core.git libreoffice
         cd libreoffice
         ######## test ####
     - name: Configure LibreOffice build
