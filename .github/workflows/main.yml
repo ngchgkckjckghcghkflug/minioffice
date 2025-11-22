@@ -43,8 +43,18 @@ jobs:
         cd libreoffice
         
         echo "=== Starting regular configuration ==="
-        ./autogen.sh --without-x --without-java --with-theme=no --disable-dynloading --enable-customtarget-components --disable-option-checking --best-effort
+        cat > configure-build.sh << 'EOF'
+        #!/bin/bash
+        #LibreOffice build with changes
+        export CFLAGS="-ffunction-sections -fdata-sections"
+        export CPPFLAGS="-ffunction-sections -fdata-sections"
+        export LDFLAGS="-Wl,--gc-sections -s"
         
+        ./autogen.sh \
+             --disable-pdfium --without-x --without-java --with-theme=no --enable-optimized=yes --enable-lto 
+        EOF
+        chmod +x configure-build.sh
+        ./configure-build.sh
         
     - name: Build LibreOffice
       run: |
