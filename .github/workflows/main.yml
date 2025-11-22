@@ -48,6 +48,7 @@ jobs:
     - name: Build LibreOffice
       run: |
         cd libreoffice/static
+        export DISABLE_DYNLOADING="true" 
         make
         
     - name: Package LibreOffice installation
