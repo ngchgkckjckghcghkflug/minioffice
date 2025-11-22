@@ -17,13 +17,12 @@ jobs:
       
     - name: Show available space
       run: |
+        ls
         df -h  # Show available space
         
     - name: Install dependencies
       run: |
         sudo apt-get update
-  
-        sudo apt-get build-dep -y libreoffice || true
         
         # Method 2: Manual dependency installation (fallback)
         echo "Installing manual dependencies..."
@@ -36,7 +35,7 @@ jobs:
         
     - name: Clone LibreOffice
       run: |
-        git clone --depth 1  -b libreoffice-7-6-7 --single-branch https://github.com/LibreOffice/core.git libreoffice
+        git clone --depth 1  -b libreoffice-25-8-3 --single-branch https://github.com/LibreOffice/core.git libreoffice
         cd libreoffice
         ######## test ####
     - name: Configure LibreOffice build
@@ -49,11 +48,9 @@ jobs:
         #LibreOffice build with changes
         export CFLAGS="-ffunction-sections -fdata-sections"
         export LDFLAGS="-Wl,--gc-sections -s"
-
-        export CAIRO_CFLAGS=""
-        export CAIRO_LIBS=""
+        
         ./autogen.sh \
-             --without-x --without-java --with-theme=no --enable-optimized=yes 
+             --without-x --without-java --with-theme=no --enable-optimized=yes --enable-lto 
         EOF
         chmod +x configure-build.sh
         ./configure-build.sh
@@ -67,11 +64,6 @@ jobs:
       run: |
         cd libreoffice
         
-        # Check what was actually built
-        echo "=== Checking build output ==="
-        find . -name "soffice*" -type f | head -10
-        ls -la instdir/ || echo "No instdir found"
-        
         # Create complete package
         mkdir -p libreoffice-build
         
@@ -83,43 +75,6 @@ jobs:
           echo "ERROR: Could not find instdir"
           exit 1
         fi
-        
-        # Create conversion script for convenience
-        cat > libreoffice-build/convert.sh << 'EOF'
-        #!/bin/bash
-        SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-        export LD_LIBRARY_PATH="$SCRIPT_DIR/program:$LD_LIBRARY_PATH"
-        
-        if [ $# -lt 2 ]; then
-          echo "Usage: $0 <input_file> <output_directory>"
-          echo "Converts documents using LibreOffice headless mode"
-          exit 1
-        fi
-        
-        INPUT_FILE="$1"
-        OUTPUT_DIR="$2"
-        
-        # Validate input
-        if [ ! -f "$INPUT_FILE" ]; then
-          echo "Error: Input file '$INPUT_FILE' not found"
-          exit 1
-        fi
-        
-        if [ ! -d "$OUTPUT_DIR" ]; then
-          mkdir -p "$OUTPUT_DIR" || {
-            echo "Error: Cannot create output directory '$OUTPUT_DIR'"
-            exit 1
-          }
-        fi
-        
-        # Convert with headless mode
-        "$SCRIPT_DIR/program/soffice" \
-          --headless \
-          --convert-to pdf \
-          --outdir "$OUTPUT_DIR" \
-          "$INPUT_FILE"
-        EOF
-        chmod +x libreoffice-build/convert.sh
         
         # Create archive
         echo "=== Creating archive ==="
