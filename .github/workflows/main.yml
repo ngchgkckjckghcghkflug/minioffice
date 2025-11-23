@@ -49,13 +49,14 @@ jobs:
         cd libreoffice
         
         echo "=== Starting regular configuration ==="
-        ./autogen.sh --disable-gtk3 --disable-gen --disable-gui --without-x --without-java --with-theme=no --disable-dynloading --enable-customtarget-components --disable-option-checking
+        ./autogen.sh --disable-gtk3 --disable-gen --disable-gui --without-x --without-java --with-theme=no --disable-dynloading --enable-customtarget-components --with-parallelism --disable-option-checking --best-effort 
+        
         
         make help
     - name: Build LibreOffice
       run: |
         cd libreoffice
-        make -j8
+        make 
         
     - name: Package LibreOffice installation
       run: |
