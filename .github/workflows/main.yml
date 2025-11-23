@@ -49,7 +49,7 @@ jobs:
         cd libreoffice
         
         echo "=== Starting regular configuration ==="
-        ./autogen.sh --disable-gui --without-x --without-java --with-theme=no --disable-skia --disable-zxing --disable-pdfium --disable-dynloading --enable-customtarget-components --disable-option-checking --best-effort
+        ./autogen.sh --disable-gtk3 --disable-gen --disable-gui --without-x --without-java --with-theme=no --disable-dynloading --enable-customtarget-components --disable-option-checking
         
         make help
     - name: Build LibreOffice
