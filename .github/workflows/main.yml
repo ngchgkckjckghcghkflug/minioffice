@@ -49,7 +49,7 @@ jobs:
         cd libreoffice
         
         echo "=== Starting regular configuration ==="
-        ./autogen.sh --disable-gtk3 --disable-gen --disable-gui --without-x --without-java --with-theme=no --disable-dynamic-loading --enable-customtarget-components --with-parallelism --disable-option-checking --best-effort 
+        ./autogen.sh --disable-gtk3 --disable-gen --disable-gui --without-x --without-java --with-openssl --with-theme=no --disable-dynamic-loading --enable-customtarget-components --with-parallelism --disable-option-checking --best-effort 
         
         
         make help
