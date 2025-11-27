@@ -35,16 +35,15 @@ jobs:
         
     - name: Clone LibreOffice
       run: |
-        git clone --depth 1  -b libreoffice-25-8-3 --single-branch https://github.com/LibreOffice/core.git libreoffice
+        git clone --depth 1  -b libreoffice-7-4-1 --single-branch https://github.com/LibreOffice/core.git libreoffice
         cd libreoffice
         ######## test ####
     - name: Configure LibreOffice build
       run: |
-        mv configure.ac ./libreoffice
         cd libreoffice
-        
         echo "=== Starting regular configuration ==="
-        ./autogen.sh --disable-gtk3 --disable-gen --disable-gui --without-x --without-java --with-openssl --with-theme=no --disable-dynamic-loading --enable-customtarget-components --with-parallelism --disable-option-checking --best-effort 
+        ./autogen.sh --disable-gtk3 --disable-gen --disable-gui --without-x --without-java --with-theme=no 
+         / --disable-dynamic-loading --enable-customtarget-components --with-parallelism="yes" --disable-option-checking --best-effort 
         
         
         make help
