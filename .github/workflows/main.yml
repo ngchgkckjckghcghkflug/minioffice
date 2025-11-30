@@ -99,7 +99,7 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.build.outputs.BUILD_FAIL == 'true' && echo "failed-build" || echo "lo-build" }}
+        name: ${{ steps.build.outputs.BUILD_FAIL == 'true' && format('failed-{0}', 'build') || format('lo-{0}', 'build') }}
         path: libreoffice/libreoffice-build.tar.gz
         retention-days: 30
         
