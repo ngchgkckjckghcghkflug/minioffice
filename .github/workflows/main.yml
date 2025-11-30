@@ -71,7 +71,7 @@ jobs:
     - name: Package LibreOffice installation
       run: |
         cd libreoffice
-        export BUILD_FAIL ="${{ steps.build.outputs.BUILD_FAIL }}"
+        export BUILD_FAIL="${{ steps.build.outputs.BUILD_FAIL }}"
         # Create complete package
         mkdir -p libreoffice-build
         
