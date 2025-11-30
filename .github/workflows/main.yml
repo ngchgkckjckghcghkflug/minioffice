@@ -63,24 +63,28 @@ jobs:
         chmod +x configure-build.sh
         ./configure-build.sh
     - name: Build LibreOffice
+      id: build
       run: |
         cd libreoffice
-        make 
+        make || echo "BUILD_FAIL=true" >> "$GITHUB_OUTPUT"
         
     - name: Package LibreOffice installation
       run: |
         cd libreoffice
-        
+        export BUILD_FAIL ="${{ steps.build.outputs.BUILD_FAIL }}"
         # Create complete package
         mkdir -p libreoffice-build
         
-        # Copy the full installation
-        if [ -d "instdir" ]; then
+        # if the build does not fail send instdir
+        if [-z "$BUILD_FAIL"]; then
           echo "Copying full LibreOffice installation..."
           cp -r instdir/* libreoffice-build/
         else
-          echo "ERROR: Could not find instdir"
-          exit 1
+          if [ -n "$BUILD_FAIL" ]; then
+              # Run if build fails
+              echo "Build failed. Exporting workdir"
+              cp -r workdir libreoffice-build/
+          fi
         fi
         
         # Create archive
@@ -95,9 +99,13 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: minimal-libreoffice
+        name: ${{ steps.build.outputs.BUILD_FAIL == 'true' && "failed-build" || "lo-build" }}
         path: libreoffice/libreoffice-build.tar.gz
         retention-days: 30
         
+    - name: Represent true status
+      run: |
+        [ steps.build.outputs.BUILD_FAIL == 'true' ] && { exit 1; }
+  
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
