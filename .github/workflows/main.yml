@@ -50,11 +50,15 @@ jobs:
         cat > configure-build.sh << 'EOF'
         #!/bin/bash
         # Regular LibreOffice build with minimal changes
+        export CXXFLAGS=" -ffunction-sections -fdata-sections" \
+        export CFLAGS=" -ffunction-sections -fdata-sections" \
+        export LDFLAGS="-Wl,--gc-sections -s"
+
         
         source ./emsdk/emsdk_env.sh
         cd libreoffice
         echo "=== Starting regular configuration ==="
-        ./autogen.sh --disable-debug --enable-sal-log --disable-crashdump --host=wasm32-local-emscripten --disable-gui --with-wasm-module=writer --with-package-format=emscripten  --without-java 
+        ./autogen.sh --disable-debug --enable-sal-log --disable-crashdump --host=wasm32-local-emscripten --disable-gui --with-wasm-module=writer --with-package-format=emscripten  --without-java --with-parallelism='yes' --enable-lto
         EOF
         chmod +x configure-build.sh
         ./configure-build.sh
