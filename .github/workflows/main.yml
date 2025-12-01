@@ -70,17 +70,37 @@ jobs:
       id: build
       run: |
         cd libreoffice
-        make || echo "BUILD_FAIL=true" >> "$GITHUB_OUTPUT"
-        
-    - name: Package LibreOffice installation
+        make
+
+
+    - name: Upload Workdir
+      if: failure() && steps.build.outcome == 'failure'
       run: |
         cd libreoffice
-        export BUILD_FAIL="${{ steps.build.outputs.BUILD_FAIL }}"
+        # make folder
+        mkdir -p libreoffice-build
+        
+        echo "Copying workdir ..."
+        cp -r workdir libreoffice-build/
+        
+        # Create archive
+        echo "=== Creating archive ==="
+        tar -czf libreoffice-build.tar.gz libreoffice-build/
+        
+        # Show final sizes
+        echo "=== Final package size ==="
+        ls -lh libreoffice-build.tar.gz
+        sha256sum libreoffice-build.tar.gz
+        
+    - name: Package LibreOffice installation
+      if: success()
+      run: |
+        cd libreoffice
         # Create complete package
         mkdir -p libreoffice-build
         
         echo "Copying full LibreOffice installation..."
-        cp -r instdir libreoffice-build/
+        cp -r instdir/* libreoffice-build/
         
         # Create archive
         echo "=== Creating archive ==="
@@ -93,14 +113,12 @@ jobs:
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
       with:
-        name: ${{ steps.build.outputs.BUILD_FAIL == 'true' && format('failed-{0}', 'build') || format('lo-{0}', 'build') }}
+        name: ${{ steps.build.outcome == 'failure' && format('failed-{0}', 'build') || format('lo-{0}', 'build') }}
         path: libreoffice/libreoffice-build.tar.gz
         retention-days: 30
         
-    - name: Represent true status
-      run: |
-        [ steps.build.outputs.BUILD_FAIL == 'true' ] && { exit 1; }
   
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

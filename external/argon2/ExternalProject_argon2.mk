@@ -49,7 +49,7 @@ $(call gb_ExternalProject_get_state_target,argon2,build):
 		$(if $(CROSS_COMPILING),,&& $(MAKE) test) \
 	)
 	$(call gb_Trace_EndRange,argon2,EXTERNAL)
-
+    @echo "CFLAGS is set to: $(CFLAGS) LDFLAGS is set to: $(LDFLAGS)"
 endif # $(COM)
 
 # vim: set noet sw=4 ts=4:
