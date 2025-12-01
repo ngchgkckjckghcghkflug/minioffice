@@ -79,17 +79,8 @@ jobs:
         # Create complete package
         mkdir -p libreoffice-build
         
-        # if the build does not fail send instdir
-        if [-z "$BUILD_FAIL"]; then
-          echo "Copying full LibreOffice installation..."
-          cp -r instdir/* libreoffice-build/
-        else
-          if [ -n "$BUILD_FAIL" ]; then
-              # Run if build fails
-              echo "Build failed. Exporting workdir"
-              cp -r workdir libreoffice-build/
-          fi
-        fi
+        echo "Copying full LibreOffice installation..."
+        cp -r instdir libreoffice-build/
         
         # Create archive
         echo "=== Creating archive ==="
