@@ -50,8 +50,8 @@ jobs:
         cat > configure-build.sh << 'EOF'
         #!/bin/bash
         # Regular LibreOffice build with minimal changes
-        export CC=emcc -pthread -s USE_PTHREADS=1 -fwasm-exceptions -s SUPPORT_LONGJMP=wasm -mbulk-memory -msimd128 -msse4.2 -msse4.1 -mssse3 -msse3 -msse2 -msse
-        export CXX=em++ -pthread -s USE_PTHREADS=1 -fwasm-exceptions -s SUPPORT_LONGJMP=wasm -mbulk-memory -msimd128 -msse4.2 -msse4.1 -mssse3 -msse3 -msse2 -msse
+        export CC="emcc -pthread -s USE_PTHREADS=1 -fwasm-exceptions -s SUPPORT_LONGJMP=wasm -mbulk-memory -msimd128 -msse4.2 -msse4.1 -mssse3 -msse3 -msse2 -msse"
+        export CXX="em++ -pthread -s USE_PTHREADS=1 -fwasm-exceptions -s SUPPORT_LONGJMP=wasm -mbulk-memory -msimd128 -msse4.2 -msse4.1 -mssse3 -msse3 -msse2 -msse"
 
         
         source ./emsdk/emsdk_env.sh
@@ -60,8 +60,7 @@ jobs:
         cd libreoffice
 
         echo "=== Starting regular configuration ==="
-        ./autogen.sh --host=wasm32-local-emscripten --enable-mpl-subset --with-vendor=Macro --disable-community-flavor --disable-poppler --enable-cairo-rgba --without-java --without-junit --without-help --with-galleries=no --disable-dbus --disable-odk --disable-kf5 --disable-gtk3 --disable-qt5 --disable-gstreamer-1-0 --disable-evolution2 --disable-gio --disable-gui --disable-scripting --disable-ext-wiki-publisher --disable-report-builder --disable-ext-nlpsolver --disable-sdremote --disable-sdremote-bluetooth --disable-postgresql-sdbc --disable-firebird-sdbc --disable-randr --disable-ext-numbertext --disable-online-update --disable-dconf --enable-release-build --disable-lotuswordpro --disable-lpsolve --without-templates --enable-sal-log --disable-debug --disable-crashdump --with-main-module=writer --enable-ccache --with-build-platform-configure-options=--enable-ccache --enable-wasm-exceptions --with-fonts --with-lang=en-US --without-gssapi --without-krb5 CC=emcc -pthread -s USE_PTHREADS=1 -fwasm-exceptions -s SUPPORT_LONGJMP=wasm -mbulk-memory -msimd128 -msse4.2 -msse4.1 -mssse3 -msse3 -msse2 -msse CXX=em++ -pthread -s USE_PTHREADS=1 -fwasm-exceptions -s SUPPORT_LONGJMP=wasm -mbulk-memory -msimd128 -msse4.2 -msse4.1 -mssse3 -msse3 -msse2 -msse
-        EOF
+        ./autogen.sh --host=wasm32-local-emscripten --enable-mpl-subset --with-vendor=Macro --disable-community-flavor --disable-poppler --enable-cairo-rgba --without-java --without-junit --without-help --with-galleries=no --disable-dbus --disable-odk --disable-kf5 --disable-gtk3 --disable-qt5 --disable-gstreamer-1-0 --disable-evolution2 --disable-gio --disable-gui --disable-scripting --disable-ext-wiki-publisher --disable-report-builder --disable-ext-nlpsolver --disable-sdremote --disable-sdremote-bluetooth --disable-postgresql-sdbc --disable-firebird-sdbc --disable-randr --disable-ext-numbertext --disable-online-update --disable-dconf --enable-release-build --disable-lotuswordpro --disable-lpsolve --without-templates --enable-sal-log --disable-debug --disable-crashdump --with-main-module=writer --enable-ccache --with-build-platform-configure-options=--enable-ccache --enable-wasm-exceptions --with-fonts --with-lang=en-US --without-gssapi --without-krb5 
         chmod +x configure-build.sh
         ./configure-build.sh
     - name: Build LibreOffice
