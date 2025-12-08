@@ -50,8 +50,8 @@ jobs:
         cat > configure-build.sh << 'EOF'
         #!/bin/bash
         # Regular LibreOffice build with minimal changes
-        export CC="emcc -pthread -s USE_PTHREADS=1 -fwasm-exceptions -s SUPPORT_LONGJMP=wasm -mbulk-memory -msimd128 -msse4.2 -msse4.1 -mssse3 -msse3 -msse2 -msse"
-        export CXX="em++ -pthread -s USE_PTHREADS=1 -fwasm-exceptions -s SUPPORT_LONGJMP=wasm -mbulk-memory -msimd128 -msse4.2 -msse4.1 -mssse3 -msse3 -msse2 -msse"
+        export CC="emcc -Oz -pthread -s USE_PTHREADS=1 -fwasm-exceptions -s SUPPORT_LONGJMP=wasm -mbulk-memory -msimd128 -msse4.2 -msse4.1 -mssse3 -msse3 -msse2 -msse"
+        export CXX="em++ -Oz -pthread -s USE_PTHREADS=1 -fwasm-exceptions -s SUPPORT_LONGJMP=wasm -mbulk-memory -msimd128 -msse4.2 -msse4.1 -mssse3 -msse3 -msse2 -msse"
 
         
         source ./emsdk/emsdk_env.sh
@@ -97,8 +97,12 @@ jobs:
         # Create complete package
         mkdir -p libreoffice-build
         
-        echo "Copying full LibreOffice installation..."
-        cp -r instdir/* libreoffice-build/
+        echo "Copying only required files"
+        cp instdir/program/soffice.js libreoffice-build/
+        cp instdir/program/soffice.worker.js libreoffice-build/
+        cp instdir/program/soffice.wasm libreoffice-build/
+        cp instdir/program/soffice.data.js.metadata libreoffice-build/
+        cp instdir/program/soffice.data libreoffice-build/
         
         # Create archive
         echo "=== Creating archive ==="
