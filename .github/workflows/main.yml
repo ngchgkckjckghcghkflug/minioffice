@@ -53,6 +53,8 @@ jobs:
         --disable-gui \
         --with-wasm-module=writer \
         --with-package-format=emscripten \
+
+        echo "=== Stopping regular configuration ==="
         
         
     - name: Build LibreOffice
