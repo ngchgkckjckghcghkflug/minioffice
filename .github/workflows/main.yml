@@ -91,11 +91,7 @@ jobs:
         mkdir -p libreoffice-build
         
         echo "Copying only required files"
-        cp instdir/program/soffice.js libreoffice-build/
-        cp instdir/program/soffice.worker.js libreoffice-build/
-        cp instdir/program/soffice.wasm libreoffice-build/
-        cp instdir/program/soffice.data.js.metadata libreoffice-build/
-        cp instdir/program/soffice.data libreoffice-build/
+        cp -R instdir/program/ libreoffice-build/
         
         # Create archive
         echo "=== Creating archive ==="
