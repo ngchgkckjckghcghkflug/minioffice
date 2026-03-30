@@ -43,7 +43,7 @@ jobs:
         ./emsdk activate 4.0.10
         cd ..
         source ./emsdk/emsdk_env.sh
-        cp minioffice/solenv/gbuild/platform/EMSCRIPTEN_INTEL_GCC.mk libreoffice/solenv/gbuild/platform/EMSCRIPTEN_INTEL_GCC.mk
+        cp solenv/gbuild/platform/EMSCRIPTEN_INTEL_GCC.mk libreoffice/solenv/gbuild/platform/EMSCRIPTEN_INTEL_GCC.mk
         cd libreoffice
 
         echo "=== Starting regular configuration ==="
